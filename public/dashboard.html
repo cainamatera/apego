@@ -7,33 +7,75 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <h2>Painel Apêgo</h2>
-        <p>Bem-vindo ao seu painel administrativo!</p>
-        <a href="/logout" class="botao-sair">Sair</a>
-        
-        <hr>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="/dashboard">Apêgo</a>
+        </div>
+        <div class="navbar-links">
+            <a href="/dashboard">Adicionar Casa</a>
+            <a href="#">Ver Casas</a>
+            <a href="#">Alugar Casa</a>
+            <a href="/logout" class="botao-sair">Sair</a>
+        </div>
+    </nav>
 
-        <h3>Adicionar Nova Casa</h3>
-        <form action="/casas" method="POST" class="dashboard-form">
-            <div class="input-group">
-                <label for="titulo">Título do Anúncio</label>
-                <input type="text" id="titulo" name="titulo" required>
+    <main class="container">
+        <div class="dashboard-form-container">
+            <h3>Adicionar Nova Casa</h3>
+
+            <div id="mensagem-sucesso" class="mensagem-sucesso" style="display: none;">
+                Casa adicionada com sucesso!
             </div>
-            <div class="input-group">
-                <label for="endereco">Endereço</label>
-                <input type="text" id="endereco" name="endereco" required>
+            <div id="mensagem-erro" class="mensagem-erro" style="display: none;">
+                Ocorreu um erro ao adicionar a casa. Tente novamente.
             </div>
-            <div class="input-group">
-                <label for="descricao">Descrição</label>
-                <textarea id="descricao" name="descricao" rows="4"></textarea>
-            </div>
-            <div class="input-group">
-                <label for="valor_diaria">Valor da Diária (ex: 150.50)</label>
-                <input type="number" id="valor_diaria" name="valor_diaria" step="0.01" required>
-            </div>
-            <button type="submit">Adicionar Casa</button>
-        </form>
-    </div>
+
+            <form action="/casas" method="POST" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label for="titulo">Título do Anúncio</label>
+                    <input type="text" id="titulo" name="titulo" required>
+                </div>
+                <div class="input-group">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" name="endereco" required>
+                </div>
+                <div class="input-group">
+                    <label>Imagens da Casa</label>
+                    <input type="file" id="imagens" name="imagens" multiple class="input-file">
+                    <label for="imagens" class="input-file-label">Escolher arquivos</label>
+                    <span id="file-name-display" class="file-name-display"></span>
+                </div>
+                <div class="input-group">
+                    <label for="descricao">Descrição</label>
+                    <textarea id="descricao" name="descricao" rows="4"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="valor_diaria">Valor da Diária (ex: 150.50)</label>
+                    <input type="number" id="valor_diaria" name="valor_diaria" step="0.01" required>
+                </div>
+                <button type="submit">Adicionar Casa</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('success')) {
+            document.getElementById('mensagem-sucesso').style.display = 'block';
+        }
+        if (params.has('error')) {
+            document.getElementById('mensagem-erro').style.display = 'block';
+        }
+
+        const inputImagens = document.getElementById('imagens');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        inputImagens.addEventListener('change', () => {
+            if (inputImagens.files.length > 0) {
+                fileNameDisplay.textContent = `${inputImagens.files.length} arquivo(s) selecionado(s)`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+    </script>
 </body>
 </html>

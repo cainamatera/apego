@@ -27,37 +27,47 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+const checarSeAdminLogado = (req, res, next) => {
+    if (req.session.adminId) {
+        next();
+    } else {
+        res.redirect('/login.html');
+    }
+};
+
 app.post('/login', async (req, res) => {
     const { email, senha } = req.body;
-
     try {
         const result = await pool.query('SELECT * FROM administradores WHERE email = $1', [email]);
-
         if (result.rows.length === 0) {
             return res.redirect('/login.html?error=1');
         }
-
         const admin = result.rows[0];
         const senhaValida = await bcrypt.compare(senha, admin.senha_hash);
-
         if (!senhaValida) {
             return res.redirect('/login.html?error=1');
         }
-        
         req.session.adminId = admin.id;
         res.redirect('/dashboard');
-
     } catch (error) {
         console.error('Erro no login:', error);
         res.status(500).send('Ocorreu um erro no servidor.');
     }
 });
 
-app.get('/dashboard', (req, res) => {
-    if (req.session.adminId) {
-        res.sendFile(path.join(__dirname, '/public/dashboard.html'));
-    } else {
-        res.redirect('/login.html');
+app.get('/dashboard', checarSeAdminLogado, (req, res) => {
+    res.sendFile(path.join(__dirname, '/public/dashboard.html'));
+});
+
+app.post('/casas', checarSeAdminLogado, async (req, res) => {
+    const { titulo, endereco, descricao, valor_diaria } = req.body;
+    try {
+        const sql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4)';
+        await pool.query(sql, [titulo, endereco, descricao, valor_diaria]);
+        res.redirect('/dashboard?success=1');
+    } catch (error) {
+        console.error('Erro ao adicionar casa:', error);
+        res.redirect('/dashboard?error=1');
     }
 });
 
