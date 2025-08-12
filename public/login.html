@@ -9,6 +9,11 @@
 <body>
     <div class="login-container">
         <h2>Painel Administrativo</h2>
+        
+        <div id="mensagem-erro" class="mensagem-erro" style="display: none;">
+            Email ou senha incorretos. Por favor, tente novamente.
+        </div>
+        
         <form action="/login" method="POST">
             <div class="input-group">
                 <label for="email">Email</label>
@@ -21,5 +26,12 @@
             <button type="submit">Entrar</button>
         </form>
     </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('error')) {
+            document.getElementById('mensagem-erro').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
