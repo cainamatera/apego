@@ -7,11 +7,33 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
+    <div class="dashboard-container">
         <h2>Painel Apêgo</h2>
         <p>Bem-vindo ao seu painel administrativo!</p>
-        <br>
-        <a href="/logout">Sair</a>
+        <a href="/logout" class="botao-sair">Sair</a>
+        
+        <hr>
+
+        <h3>Adicionar Nova Casa</h3>
+        <form action="/casas" method="POST" class="dashboard-form">
+            <div class="input-group">
+                <label for="titulo">Título do Anúncio</label>
+                <input type="text" id="titulo" name="titulo" required>
+            </div>
+            <div class="input-group">
+                <label for="endereco">Endereço</label>
+                <input type="text" id="endereco" name="endereco" required>
+            </div>
+            <div class="input-group">
+                <label for="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" rows="4"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="valor_diaria">Valor da Diária (ex: 150.50)</label>
+                <input type="number" id="valor_diaria" name="valor_diaria" step="0.01" required>
+            </div>
+            <button type="submit">Adicionar Casa</button>
+        </form>
     </div>
 </body>
 </html>
