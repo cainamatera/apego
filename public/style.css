@@ -1,7 +1,16 @@
+/* Estilo geral, usado pelo painel */
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     margin: 0;
+}
+
+/* Estilo específico para centralizar o conteúdo da página de login */
+.body-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 .navbar {
@@ -45,7 +54,7 @@ body {
     justify-content: center;
 }
 
-.dashboard-form-container {
+.form-container, .dashboard-form-container {
     background-color: #fff;
     padding: 2rem;
     border-radius: 8px;
@@ -54,7 +63,12 @@ body {
     max-width: 600px;
 }
 
-h3 {
+.form-container {
+    max-width: 400px;
+    text-align: center;
+}
+
+h2, h3 {
     text-align: center;
     margin-top: 0;
     margin-bottom: 1.5rem;

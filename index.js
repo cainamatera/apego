@@ -3,8 +3,10 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const multer = require('multer');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -16,6 +18,23 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 });
+
+const uploadDir = 'public/uploads';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
 
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
@@ -59,15 +78,30 @@ app.get('/dashboard', checarSeAdminLogado, (req, res) => {
     res.sendFile(path.join(__dirname, '/public/dashboard.html'));
 });
 
-app.post('/casas', checarSeAdminLogado, async (req, res) => {
+app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req, res) => {
     const { titulo, endereco, descricao, valor_diaria } = req.body;
+    const client = await pool.connect();
+
     try {
-        const sql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4)';
-        await pool.query(sql, [titulo, endereco, descricao, valor_diaria]);
+        await client.query('BEGIN');
+
+        const casaSql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4) RETURNING id';
+        const casaResult = await client.query(casaSql, [titulo, endereco, descricao, valor_diaria]);
+        const casaId = casaResult.rows[0].id;
+
+        const imagensSql = 'INSERT INTO imagens_casas (casa_id, caminho_arquivo) VALUES ($1, $2)';
+        for (const file of req.files) {
+            await client.query(imagensSql, [casaId, file.filename]);
+        }
+        
+        await client.query('COMMIT');
         res.redirect('/dashboard?success=1');
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error('Erro ao adicionar casa:', error);
         res.redirect('/dashboard?error=1');
+    } finally {
+        client.release();
     }
 });
 
