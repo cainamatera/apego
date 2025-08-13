@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Alugueis - Apêgo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="container">
+        <div class="table-container">
+            <h3>Relatório de Alugueis</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Casa</th>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Período</th>
+                        <th>Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (alugueis.length === 0) { %>
+                        <tr>
+                            <td colspan="5">Nenhum aluguel registrado até o momento.</td>
+                        </tr>
+                    <% } else { %>
+                        <% alugueis.forEach(aluguel => { %>
+                            <tr>
+                                <td><%= aluguel.casa_titulo %></td>
+                                <td><%= aluguel.cliente_nome %></td>
+                                <td><%= aluguel.cliente_email || aluguel.cliente_telefone %></td>
+                                <td><%= new Date(aluguel.data_inicio).toLocaleDateString('pt-BR') %> a <%= new Date(aluguel.data_fim).toLocaleDateString('pt-BR') %></td>
+                                <td><%= parseFloat(aluguel.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

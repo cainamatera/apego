@@ -196,6 +196,30 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     }
 });
 
+app.get('/relatorio-alugueis', checarSeAdminLogado, async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                c.titulo AS casa_titulo,
+                cl.nome AS cliente_nome,
+                cl.email AS cliente_email,
+                cl.telefone AS cliente_telefone,
+                a.data_inicio,
+                a.data_fim,
+                a.valor_total
+            FROM alugueis a
+            JOIN casas c ON a.casa_id = c.id
+            JOIN clientes cl ON a.cliente_id = cl.id
+            ORDER BY a.data_inicio DESC
+        `;
+        const result = await pool.query(sql);
+        res.render('relatorio', { alugueis: result.rows });
+    } catch (error) {
+        console.error('Erro ao buscar relatório de alugueis:', error);
+        res.status(500).send("Erro ao carregar o relatório.");
+    }
+});
+
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
