@@ -283,3 +283,40 @@ input[type="date"] {
     font-weight: bold;
 }
 
+.acoes-cell {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.acao-form {
+    margin: 0;
+    padding: 0;
+}
+
+.botao-acao {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.botao-alugar { background-color: #28a745; }
+.botao-alugar:hover { background-color: #218838; }
+
+.botao-editar { background-color: #ffc107; color: #212529; }
+.botao-editar:hover { background-color: #e0a800; }
+
+.botao-excluir { background-color: #dc3545; }
+.botao-excluir:hover { background-color: #c82333; }
+
+.botao-cancelar { background-color: #6c757d; }
+.botao-cancelar:hover { background-color: #5a6268; }
+

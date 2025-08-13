@@ -1,10 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Casas - Apêgo</title>
-    <link rel="stylesheet" href="/style.css">
+    <%- include('partials/header', { titulo: 'Gestão de Casas - Apêgo' }) %>
 </head>
 <body>
     <%- include('partials/navbar') %>
@@ -18,6 +15,11 @@
                     Aluguel registrado com sucesso!
                 </div>
             <% } %>
+            <% if (removido) { %>
+                <div class="mensagem-sucesso">
+                    Aluguel removido com sucesso! A casa está disponível novamente.
+                </div>
+            <% } %>
             <% if (error) { %>
                 <div class="mensagem-erro">
                     Ocorreu um erro. Tente novamente.
@@ -28,18 +30,16 @@
                 <thead>
                     <tr>
                         <th>Título</th>
-                        <th>Endereço</th>
                         <th>Valor Mensal</th>
                         <th>Status</th>
                         <th>Duração</th>
-                        <th>Ação</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% casas.forEach(casa => { %>
                         <tr>
                             <td><%= casa.titulo %></td>
-                            <td><%= casa.endereco %></td>
                             <td>
                                 <%= parseFloat(casa.valor_mensal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %>
                             </td>
@@ -57,12 +57,30 @@
                                     -
                                 <% } %>
                             </td>
-                            <td>
+                            <td class="acoes-cell">
                                 <% if (casa.status === 'alugada') { %>
-                                    <span class="acao-icon check-verde">✓</span>
+                                    <form action="/aluguel/remover" method="POST" onsubmit="return confirm('Tem a certeza que deseja cancelar este aluguel? Esta ação é permanente.');" class="acao-form">
+                                        <input type="hidden" name="aluguel_id" value="<%= casa.aluguel_id %>">
+                                        <input type="hidden" name="cliente_id" value="<%= casa.cliente_id %>">
+                                        <input type="hidden" name="casa_id" value="<%= casa.id %>">
+                                        <button type="submit" class="botao-acao botao-cancelar" title="Cancelar Aluguel">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
                                 <% } else { %>
-                                    <a href="/aluguel/<%= casa.id %>" class="acao-icon mais-vermelho">+</a>
+                                    <a href="/aluguel/<%= casa.id %>" class="botao-acao botao-alugar" title="Alugar Casa">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
                                 <% } %>
+                                <a href="#" class="botao-acao botao-editar" title="Editar Casa">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <form action="#" method="POST" onsubmit="return confirm('Tem a certeza ABSOLUTA que deseja excluir esta casa e todos os seus dados? Esta ação não pode ser desfeita.');" class="acao-form">
+                                    <input type="hidden" name="casa_id" value="<%= casa.id %>">
+                                    <button type="submit" class="botao-acao botao-excluir" title="Excluir Casa">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     <% }) %>

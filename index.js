@@ -124,9 +124,9 @@ app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
         const sql = `
             SELECT 
                 c.id, c.titulo, c.endereco, c.status, c.valor_mensal,
-                a.valor_total, a.data_inicio, a.data_fim
+                a.id AS aluguel_id, a.cliente_id, a.valor_total, a.data_inicio, a.data_fim
             FROM casas c
-            LEFT JOIN alugueis a ON c.id = a.casa_id
+            LEFT JOIN alugueis a ON c.id = a.casa_id AND c.status = 'alugada'
             ORDER BY c.id DESC
         `;
         const result = await pool.query(sql);
@@ -143,7 +143,8 @@ app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
         res.render('alugueis', { 
             casas: casasComDuracao,
             success: req.query.success,
-            error: req.query.error 
+            error: req.query.error,
+            removido: req.query.removido
         });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
@@ -191,6 +192,25 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Erro ao registrar aluguel:', error);
         res.status(500).send("Ocorreu um erro ao registrar o aluguel.");
+    } finally {
+        client.release();
+    }
+});
+
+app.post('/aluguel/remover', checarSeAdminLogado, async (req, res) => {
+    const { aluguel_id, cliente_id, casa_id } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('DELETE FROM alugueis WHERE id = $1', [aluguel_id]);
+        await client.query('DELETE FROM clientes WHERE id = $1', [cliente_id]);
+        await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['disponivel', casa_id]);
+        await client.query('COMMIT');
+        res.redirect('/alugueis?removido=1');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao remover aluguel:', error);
+        res.status(500).send("Ocorreu um erro ao remover o aluguel.");
     } finally {
         client.release();
     }
