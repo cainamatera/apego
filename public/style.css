@@ -320,3 +320,13 @@ input[type="date"] {
 .botao-cancelar { background-color: #6c757d; }
 .botao-cancelar:hover { background-color: #5a6268; }
 
+.botao-acao.disabled {
+    background-color: #e2e3e5;
+    cursor: not-allowed;
+    color: #6c757d;
+}
+
+.botao-acao.disabled:hover {
+    background-color: #e2e3e5;
+}
+

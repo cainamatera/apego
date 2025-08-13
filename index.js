@@ -224,9 +224,10 @@ app.post('/casa/excluir/:id', checarSeAdminLogado, async (req, res) => {
         await client.query('BEGIN');
         const imagensResult = await client.query('SELECT caminho_arquivo FROM imagens_casas WHERE casa_id = $1', [id]);
         for (const imagem of imagensResult.rows) {
-            fs.unlink(path.join(__dirname, 'public/uploads', imagem.caminho_arquivo), (err) => {
-                if (err) console.error("Erro ao apagar arquivo de imagem:", err);
-            });
+            const caminhoCompleto = path.join(__dirname, 'public/uploads', imagem.caminho_arquivo);
+            if (fs.existsSync(caminhoCompleto)) {
+                fs.unlinkSync(caminhoCompleto);
+            }
         }
         await client.query('DELETE FROM casas WHERE id = $1', [id]);
         await client.query('COMMIT');
@@ -237,6 +238,37 @@ app.post('/casa/excluir/:id', checarSeAdminLogado, async (req, res) => {
         res.status(500).send("Ocorreu um erro ao excluir a casa.");
     } finally {
         client.release();
+    }
+});
+
+app.get('/casa/editar/:id', checarSeAdminLogado, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('SELECT * FROM casas WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Casa não encontrada.');
+        }
+        res.render('editar-casa', { casa: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao buscar dados da casa para edição:', error);
+        res.status(500).send('Erro ao carregar página de edição.');
+    }
+});
+
+app.post('/casa/editar/:id', checarSeAdminLogado, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titulo, endereco, descricao, valor_mensal } = req.body;
+        const sql = `
+            UPDATE casas 
+            SET titulo = $1, endereco = $2, descricao = $3, valor_mensal = $4 
+            WHERE id = $5
+        `;
+        await pool.query(sql, [titulo, endereco, descricao, valor_mensal, id]);
+        res.redirect('/alugueis?success=Casa+atualizada+com+sucesso');
+    } catch (error) {
+        console.error('Erro ao atualizar casa:', error);
+        res.status(500).send('Erro ao salvar as alterações.');
     }
 });
 

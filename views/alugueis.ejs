@@ -10,22 +10,12 @@
         <div class="table-container">
             <h3>Gestão de Casas e Alugueis</h3>
 
-            <% if (success) { %>
+            <% if (locals.success) { %>
                 <div class="mensagem-sucesso">
-                    Aluguel registrado com sucesso!
+                    <%= success %>
                 </div>
             <% } %>
-            <% if (removido) { %>
-                <div class="mensagem-sucesso">
-                    Aluguel removido com sucesso! A casa está disponível novamente.
-                </div>
-            <% } %>
-            <% if (casa_excluida) { %>
-                <div class="mensagem-sucesso">
-                    Casa excluída com sucesso do catálogo.
-                </div>
-            <% } %>
-            <% if (error) { %>
+            <% if (locals.error) { %>
                 <div class="mensagem-erro">
                     Ocorreu um erro. Tente novamente.
                 </div>
@@ -37,7 +27,6 @@
                         <th>Título</th>
                         <th>Valor Mensal</th>
                         <th>Status</th>
-                        <th>Duração</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -55,13 +44,6 @@
                                     <span class="status-chip status-disponivel">Disponível</span>
                                 <% } %>
                             </td>
-                            <td>
-                                <% if (casa.status === 'alugada' && casa.duracaoEmMeses) { %>
-                                    <%= casa.duracaoEmMeses %> <%= casa.duracaoEmMeses === 1 ? 'mês' : 'meses' %>
-                                <% } else { %>
-                                    -
-                                <% } %>
-                            </td>
                             <td class="acoes-cell">
                                 <% if (casa.status === 'alugada') { %>
                                     <form action="/aluguel/remover" method="POST" onsubmit="return confirm('Tem a certeza que deseja cancelar este aluguel? Esta ação é permanente.');" class="acao-form">
@@ -72,14 +54,17 @@
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </form>
+                                    <a href="#" class="botao-acao botao-editar disabled" title="Editar Aluguel (Em breve)">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
                                 <% } else { %>
                                     <a href="/aluguel/<%= casa.id %>" class="botao-acao botao-alugar" title="Alugar Casa">
                                         <i class="fas fa-plus"></i>
                                     </a>
+                                    <a href="/casa/editar/<%= casa.id %>" class="botao-acao botao-editar" title="Editar Casa">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
                                 <% } %>
-                                <a href="#" class="botao-acao botao-editar" title="Editar Casa">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
                                 <form action="/casa/excluir/<%= casa.id %>" method="POST" onsubmit="return confirm('Tem a certeza ABSOLUTA que deseja excluir esta casa e todos os seus dados? Esta ação não pode ser desfeita.');" class="acao-form">
                                     <button type="submit" class="botao-acao botao-excluir" title="Excluir Casa">
                                         <i class="fas fa-trash-alt"></i>

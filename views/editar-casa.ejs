@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <%- include('partials/header', { titulo: 'Editar Casa - Apêgo' }) %>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="container">
+        <div class="dashboard-form-container">
+            <h3>Editar Casa: <%= casa.titulo %></h3>
+
+            <form action="/casa/editar/<%= casa.id %>" method="POST">
+                <div class="input-group">
+                    <label for="titulo">Título do Anúncio</label>
+                    <input type="text" id="titulo" name="titulo" value="<%= casa.titulo %>" required>
+                </div>
+                <div class="input-group">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" name="endereco" value="<%= casa.endereco %>" required>
+                </div>
+                <div class="input-group">
+                    <label for="descricao">Descrição</label>
+                    <textarea id="descricao" name="descricao" rows="4"><%= casa.descricao %></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="valor_mensal">Valor Mensal</label>
+                    <input type="number" id="valor_mensal" name="valor_mensal" value="<%= casa.valor_mensal %>" step="0.01" required>
+                </div>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
