@@ -144,7 +144,8 @@ app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
             casas: casasComDuracao,
             success: req.query.success,
             error: req.query.error,
-            removido: req.query.removido
+            removido: req.query.removido,
+            casa_excluida: req.query.casa_excluida
         });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
@@ -166,7 +167,6 @@ app.get('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     }
 });
 
-// ROTA MOVIDA PARA CIMA (A CORREÇÃO)
 app.post('/aluguel/remover', checarSeAdminLogado, async (req, res) => {
     const { aluguel_id, cliente_id, casa_id } = req.body;
     const client = await pool.connect();
@@ -212,6 +212,29 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Erro ao registrar aluguel:', error);
         res.status(500).send("Ocorreu um erro ao registrar o aluguel.");
+    } finally {
+        client.release();
+    }
+});
+
+app.post('/casa/excluir/:id', checarSeAdminLogado, async (req, res) => {
+    const { id } = req.params;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const imagensResult = await client.query('SELECT caminho_arquivo FROM imagens_casas WHERE casa_id = $1', [id]);
+        for (const imagem of imagensResult.rows) {
+            fs.unlink(path.join(__dirname, 'public/uploads', imagem.caminho_arquivo), (err) => {
+                if (err) console.error("Erro ao apagar arquivo de imagem:", err);
+            });
+        }
+        await client.query('DELETE FROM casas WHERE id = $1', [id]);
+        await client.query('COMMIT');
+        res.redirect('/alugueis?casa_excluida=1');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao excluir casa:', error);
+        res.status(500).send("Ocorreu um erro ao excluir a casa.");
     } finally {
         client.release();
     }

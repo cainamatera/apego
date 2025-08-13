@@ -20,6 +20,11 @@
                     Aluguel removido com sucesso! A casa está disponível novamente.
                 </div>
             <% } %>
+            <% if (casa_excluida) { %>
+                <div class="mensagem-sucesso">
+                    Casa excluída com sucesso do catálogo.
+                </div>
+            <% } %>
             <% if (error) { %>
                 <div class="mensagem-erro">
                     Ocorreu um erro. Tente novamente.
@@ -75,8 +80,7 @@
                                 <a href="#" class="botao-acao botao-editar" title="Editar Casa">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <form action="#" method="POST" onsubmit="return confirm('Tem a certeza ABSOLUTA que deseja excluir esta casa e todos os seus dados? Esta ação não pode ser desfeita.');" class="acao-form">
-                                    <input type="hidden" name="casa_id" value="<%= casa.id %>">
+                                <form action="/casa/excluir/<%= casa.id %>" method="POST" onsubmit="return confirm('Tem a certeza ABSOLUTA que deseja excluir esta casa e todos os seus dados? Esta ação não pode ser desfeita.');" class="acao-form">
                                     <button type="submit" class="botao-acao botao-excluir" title="Excluir Casa">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
