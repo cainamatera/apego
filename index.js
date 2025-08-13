@@ -77,25 +77,21 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/dashboard', checarSeAdminLogado, (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/dashboard.html'));
+    res.render('dashboard');
 });
 
 app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req, res) => {
     const { titulo, endereco, descricao, valor_diaria } = req.body;
     const client = await pool.connect();
-
     try {
         await client.query('BEGIN');
-
         const casaSql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4) RETURNING id';
         const casaResult = await client.query(casaSql, [titulo, endereco, descricao, valor_diaria]);
         const casaId = casaResult.rows[0].id;
-
         const imagensSql = 'INSERT INTO imagens_casas (casa_id, caminho_arquivo) VALUES ($1, $2)';
         for (const file of req.files) {
             await client.query(imagensSql, [casaId, file.filename]);
         }
-        
         await client.query('COMMIT');
         res.redirect('/dashboard?success=1');
     } catch (error) {
@@ -107,13 +103,27 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
     }
 });
 
-app.get('/alugar', checarSeAdminLogado, async (req, res) => {
+app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM casas ORDER BY id DESC');
-        res.render('alugar', { casas: result.rows });
+        res.render('alugueis', { casas: result.rows });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
         res.status(500).send("Erro ao carregar a página de gestão de casas.");
+    }
+});
+
+app.get('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('SELECT * FROM casas WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).send("Casa não encontrada.");
+        }
+        res.render('pagina-aluguel', { casa: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao buscar detalhes da casa:', error);
+        res.status(500).send("Erro ao carregar a página de aluguel.");
     }
 });
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alugar Casa - Apêgo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    
+    <main class="container">
+        <div class="dashboard-form-container">
+            <div class="detalhes-casa">
+                <h3>Alugar: <%= casa.titulo %></h3>
+                <p><%= casa.endereco %></p>
+            </div>
+
+            <hr>
+
+            <form action="/aluguel/<%= casa.id %>" method="POST">
+                <h4>Dados do Cliente</h4>
+                <div class="input-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+                <div class="input-group">
+                    <label for="rg">RG</label>
+                    <input type="text" id="rg" name="rg">
+                </div>
+                <div class="input-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" name="telefone">
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <h4>Período do Aluguel</h4>
+                <div class="input-group">
+                    <label for="data_inicio">Data de Início</label>
+                    <input type="date" id="data_inicio" name="data_inicio" required>
+                </div>
+                <div class="input-group">
+                    <label for="data_fim">Data de Fim</label>
+                    <input type="date" id="data_fim" name="data_fim" required>
+                </div>
+                
+                <button type="submit">Confirmar Aluguel</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

@@ -11,7 +11,7 @@
 
     <main class="container">
         <div class="table-container">
-            <h3>Gestão de Casas</h3>
+            <h3>Gestão de Casas e Alugueis</h3>
             <table>
                 <thead>
                     <tr>
@@ -37,7 +37,7 @@
                                 <% if (casa.status === 'alugada') { %>
                                     <span class="acao-icon check-verde">✓</span>
                                 <% } else { %>
-                                    <a href="/alugar/<%= casa.id %>" class="acao-icon mais-vermelho">+</a>
+                                    <a href="/aluguel/<%= casa.id %>" class="acao-icon mais-vermelho">+</a>
                                 <% } %>
                             </td>
                         </tr>

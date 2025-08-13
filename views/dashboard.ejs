@@ -4,19 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - Apêgo</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="/dashboard">Apêgo</a>
-        </div>
-        <div class="navbar-links">
-            <a href="/dashboard">Adicionar Casa</a>
-            <a href="/alugar">Alugar Casa</a>
-            <a href="/logout" class="botao-sair">Sair</a>
-        </div>
-    </nav>
+    <%- include('partials/navbar') %>
 
     <main class="container">
         <div class="dashboard-form-container">
