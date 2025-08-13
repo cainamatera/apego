@@ -166,6 +166,26 @@ app.get('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     }
 });
 
+// ROTA MOVIDA PARA CIMA (A CORREÇÃO)
+app.post('/aluguel/remover', checarSeAdminLogado, async (req, res) => {
+    const { aluguel_id, cliente_id, casa_id } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('DELETE FROM alugueis WHERE id = $1', [aluguel_id]);
+        await client.query('DELETE FROM clientes WHERE id = $1', [cliente_id]);
+        await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['disponivel', casa_id]);
+        await client.query('COMMIT');
+        res.redirect('/alugueis?removido=1');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao remover aluguel:', error);
+        res.status(500).send("Ocorreu um erro ao remover o aluguel.");
+    } finally {
+        client.release();
+    }
+});
+
 app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     const { id: casa_id } = req.params;
     const { nome, rg, telefone, email, data_inicio, data_fim } = req.body;
@@ -192,25 +212,6 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
         await client.query('ROLLBACK');
         console.error('Erro ao registrar aluguel:', error);
         res.status(500).send("Ocorreu um erro ao registrar o aluguel.");
-    } finally {
-        client.release();
-    }
-});
-
-app.post('/aluguel/remover', checarSeAdminLogado, async (req, res) => {
-    const { aluguel_id, cliente_id, casa_id } = req.body;
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-        await client.query('DELETE FROM alugueis WHERE id = $1', [aluguel_id]);
-        await client.query('DELETE FROM clientes WHERE id = $1', [cliente_id]);
-        await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['disponivel', casa_id]);
-        await client.query('COMMIT');
-        res.redirect('/alugueis?removido=1');
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error('Erro ao remover aluguel:', error);
-        res.status(500).send("Ocorreu um erro ao remover o aluguel.");
     } finally {
         client.release();
     }
