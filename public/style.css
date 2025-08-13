@@ -169,3 +169,60 @@ button:hover {
     font-style: italic;
     color: #6c757d;
 }
+
+.table-container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 900px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+}
+
+.status-chip {
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-disponivel {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-alugada {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.acao-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.check-verde {
+    color: #28a745;
+}
+
+.mais-vermelho {
+    color: #dc3545;
+}
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Casas - Apêgo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="container">
+        <div class="table-container">
+            <h3>Gestão de Casas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Endereço</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% casas.forEach(casa => { %>
+                        <tr>
+                            <td><%= casa.titulo %></td>
+                            <td><%= casa.endereco %></td>
+                            <td>
+                                <% if (casa.status === 'alugada') { %>
+                                    <span class="status-chip status-alugada">Alugada</span>
+                                <% } else { %>
+                                    <span class="status-chip status-disponivel">Disponível</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (casa.status === 'alugada') { %>
+                                    <span class="acao-icon check-verde">✓</span>
+                                <% } else { %>
+                                    <a href="/alugar/<%= casa.id %>" class="acao-icon mais-vermelho">+</a>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

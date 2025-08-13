@@ -11,6 +11,8 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
+app.set('view engine', 'ejs');
+
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -102,6 +104,16 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
         res.redirect('/dashboard?error=1');
     } finally {
         client.release();
+    }
+});
+
+app.get('/alugar', checarSeAdminLogado, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM casas ORDER BY id DESC');
+        res.render('alugar', { casas: result.rows });
+    } catch (error) {
+        console.error('Erro ao buscar casas:', error);
+        res.status(500).send("Erro ao carregar a página de gestão de casas.");
     }
 });
 
