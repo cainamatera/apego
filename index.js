@@ -80,10 +80,8 @@ app.get('/dashboard', checarSeAdminLogado, async (req, res) => {
     try {
         const totalCasasResult = await pool.query('SELECT COUNT(*) FROM casas');
         const casasAlugadasResult = await pool.query("SELECT COUNT(*) FROM casas WHERE status = 'alugada'");
-
         const totalCasas = totalCasasResult.rows[0].count;
         const casasAlugadas = casasAlugadasResult.rows[0].count;
-
         res.render('dashboard', {
             success: req.query.success,
             error: req.query.error,
@@ -97,12 +95,12 @@ app.get('/dashboard', checarSeAdminLogado, async (req, res) => {
 });
 
 app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req, res) => {
-    const { titulo, endereco, descricao, valor_diaria } = req.body;
+    const { titulo, endereco, descricao, valor_mensal } = req.body;
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        const casaSql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4) RETURNING id';
-        const casaResult = await client.query(casaSql, [titulo, endereco, descricao, valor_diaria]);
+        const casaSql = 'INSERT INTO casas (titulo, endereco, descricao, valor_mensal) VALUES ($1, $2, $3, $4) RETURNING id';
+        const casaResult = await client.query(casaSql, [titulo, endereco, descricao, valor_mensal]);
         const casaId = casaResult.rows[0].id;
         if (req.files) {
             const imagensSql = 'INSERT INTO imagens_casas (casa_id, caminho_arquivo) VALUES ($1, $2)';
@@ -123,11 +121,29 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
 
 app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM casas ORDER BY id DESC');
-        res.render('alugueis', {
-            casas: result.rows,
+        const sql = `
+            SELECT 
+                c.id, c.titulo, c.endereco, c.status, c.valor_mensal,
+                a.valor_total, a.data_inicio, a.data_fim
+            FROM casas c
+            LEFT JOIN alugueis a ON c.id = a.casa_id
+            ORDER BY c.id DESC
+        `;
+        const result = await pool.query(sql);
+        const casasComDuracao = result.rows.map(casa => {
+            if (casa.status === 'alugada' && casa.data_inicio && casa.data_fim) {
+                const dataInicio = new Date(casa.data_inicio);
+                const dataFim = new Date(casa.data_fim);
+                const diffAnos = dataFim.getFullYear() - dataInicio.getFullYear();
+                const diffMeses = diffAnos * 12 + (dataFim.getMonth() - dataInicio.getMonth());
+                return { ...casa, duracaoEmMeses: Math.max(1, diffMeses) };
+            }
+            return casa;
+        });
+        res.render('alugueis', { 
+            casas: casasComDuracao,
             success: req.query.success,
-            error: req.query.error
+            error: req.query.error 
         });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
@@ -155,13 +171,14 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        const casaResult = await client.query('SELECT valor_diaria FROM casas WHERE id = $1', [casa_id]);
-        const valorDiaria = casaResult.rows[0].valor_diaria;
+        const casaResult = await client.query('SELECT valor_mensal FROM casas WHERE id = $1', [casa_id]);
+        const valorMensal = casaResult.rows[0].valor_mensal;
         const dataInicio = new Date(data_inicio);
         const dataFim = new Date(data_fim);
-        const diffTime = Math.abs(dataFim - dataInicio);
-        const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-        const valorTotal = diffDays * valorDiaria;
+        const diffAnos = dataFim.getFullYear() - dataInicio.getFullYear();
+        const diffMeses = diffAnos * 12 + (dataFim.getMonth() - dataInicio.getMonth());
+        const duracaoMeses = Math.max(1, diffMeses);
+        const valorTotal = duracaoMeses * valorMensal;
         const clienteSql = 'INSERT INTO clientes (nome, rg, telefone, email) VALUES ($1, $2, $3, $4) RETURNING id';
         const clienteResult = await client.query(clienteSql, [nome, rg, telefone, email]);
         const clienteId = clienteResult.rows[0].id;

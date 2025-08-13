@@ -29,7 +29,9 @@
                     <tr>
                         <th>Título</th>
                         <th>Endereço</th>
+                        <th>Valor Mensal</th>
                         <th>Status</th>
+                        <th>Duração</th>
                         <th>Ação</th>
                     </tr>
                 </thead>
@@ -39,10 +41,20 @@
                             <td><%= casa.titulo %></td>
                             <td><%= casa.endereco %></td>
                             <td>
+                                <%= parseFloat(casa.valor_mensal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %>
+                            </td>
+                            <td>
                                 <% if (casa.status === 'alugada') { %>
                                     <span class="status-chip status-alugada">Alugada</span>
                                 <% } else { %>
                                     <span class="status-chip status-disponivel">Disponível</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (casa.status === 'alugada' && casa.duracaoEmMeses) { %>
+                                    <%= casa.duracaoEmMeses %> <%= casa.duracaoEmMeses === 1 ? 'mês' : 'meses' %>
+                                <% } else { %>
+                                    -
                                 <% } %>
                             </td>
                             <td>
