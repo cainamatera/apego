@@ -12,6 +12,18 @@
     <main class="container">
         <div class="table-container">
             <h3>Gestão de Casas e Alugueis</h3>
+
+            <% if (success) { %>
+                <div class="mensagem-sucesso">
+                    Aluguel registrado com sucesso!
+                </div>
+            <% } %>
+            <% if (error) { %>
+                <div class="mensagem-erro">
+                    Ocorreu um erro. Tente novamente.
+                </div>
+            <% } %>
+
             <table>
                 <thead>
                     <tr>

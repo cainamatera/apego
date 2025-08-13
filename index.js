@@ -88,9 +88,11 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
         const casaSql = 'INSERT INTO casas (titulo, endereco, descricao, valor_diaria) VALUES ($1, $2, $3, $4) RETURNING id';
         const casaResult = await client.query(casaSql, [titulo, endereco, descricao, valor_diaria]);
         const casaId = casaResult.rows[0].id;
-        const imagensSql = 'INSERT INTO imagens_casas (casa_id, caminho_arquivo) VALUES ($1, $2)';
-        for (const file of req.files) {
-            await client.query(imagensSql, [casaId, file.filename]);
+        if (req.files) {
+            const imagensSql = 'INSERT INTO imagens_casas (casa_id, caminho_arquivo) VALUES ($1, $2)';
+            for (const file of req.files) {
+                await client.query(imagensSql, [casaId, file.filename]);
+            }
         }
         await client.query('COMMIT');
         res.redirect('/dashboard?success=1');
@@ -106,7 +108,11 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
 app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM casas ORDER BY id DESC');
-        res.render('alugueis', { casas: result.rows });
+        res.render('alugueis', { 
+            casas: result.rows,
+            success: req.query.success,
+            error: req.query.error 
+        });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
         res.status(500).send("Erro ao carregar a página de gestão de casas.");
@@ -117,13 +123,50 @@ app.get('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await pool.query('SELECT * FROM casas WHERE id = $1', [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).send("Casa não encontrada.");
+        if (result.rows.length === 0 || result.rows[0].status === 'alugada') {
+            return res.status(404).send("Casa não encontrada ou já alugada.");
         }
         res.render('pagina-aluguel', { casa: result.rows[0] });
     } catch (error) {
         console.error('Erro ao buscar detalhes da casa:', error);
         res.status(500).send("Erro ao carregar a página de aluguel.");
+    }
+});
+
+app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
+    const { id: casa_id } = req.params;
+    const { nome, rg, telefone, email, data_inicio, data_fim } = req.body;
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        const casaResult = await client.query('SELECT valor_diaria FROM casas WHERE id = $1', [casa_id]);
+        const valorDiaria = casaResult.rows[0].valor_diaria;
+        
+        const dataInicio = new Date(data_inicio);
+        const dataFim = new Date(data_fim);
+        const diffTime = Math.abs(dataFim - dataInicio);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const valorTotal = diffDays * valorDiaria;
+        
+        const clienteSql = 'INSERT INTO clientes (nome, rg, telefone, email) VALUES ($1, $2, $3, $4) RETURNING id';
+        const clienteResult = await client.query(clienteSql, [nome, rg, telefone, email]);
+        const clienteId = clienteResult.rows[0].id;
+        
+        const aluguelSql = 'INSERT INTO alugueis (casa_id, cliente_id, data_inicio, data_fim, valor_total) VALUES ($1, $2, $3, $4, $5)';
+        await client.query(aluguelSql, [casa_id, clienteId, data_inicio, data_fim, valorTotal]);
+        
+        await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['alugada', casa_id]);
+
+        await client.query('COMMIT');
+        res.redirect('/alugueis?success=1');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao registrar aluguel:', error);
+        res.status(500).send("Ocorreu um erro ao registrar o aluguel.");
+    } finally {
+        client.release();
     }
 });
 
