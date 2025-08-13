@@ -76,8 +76,24 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/dashboard', checarSeAdminLogado, (req, res) => {
-    res.render('dashboard');
+app.get('/dashboard', checarSeAdminLogado, async (req, res) => {
+    try {
+        const totalCasasResult = await pool.query('SELECT COUNT(*) FROM casas');
+        const casasAlugadasResult = await pool.query("SELECT COUNT(*) FROM casas WHERE status = 'alugada'");
+
+        const totalCasas = totalCasasResult.rows[0].count;
+        const casasAlugadas = casasAlugadasResult.rows[0].count;
+
+        res.render('dashboard', {
+            success: req.query.success,
+            error: req.query.error,
+            totalCasas: totalCasas,
+            casasAlugadas: casasAlugadas
+        });
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas:', error);
+        res.status(500).send("Erro ao carregar o painel.");
+    }
 });
 
 app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req, res) => {
@@ -108,10 +124,10 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
 app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM casas ORDER BY id DESC');
-        res.render('alugueis', { 
+        res.render('alugueis', {
             casas: result.rows,
             success: req.query.success,
-            error: req.query.error 
+            error: req.query.error
         });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
@@ -137,28 +153,21 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
     const { id: casa_id } = req.params;
     const { nome, rg, telefone, email, data_inicio, data_fim } = req.body;
     const client = await pool.connect();
-
     try {
         await client.query('BEGIN');
-
         const casaResult = await client.query('SELECT valor_diaria FROM casas WHERE id = $1', [casa_id]);
         const valorDiaria = casaResult.rows[0].valor_diaria;
-        
         const dataInicio = new Date(data_inicio);
         const dataFim = new Date(data_fim);
         const diffTime = Math.abs(dataFim - dataInicio);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
         const valorTotal = diffDays * valorDiaria;
-        
         const clienteSql = 'INSERT INTO clientes (nome, rg, telefone, email) VALUES ($1, $2, $3, $4) RETURNING id';
         const clienteResult = await client.query(clienteSql, [nome, rg, telefone, email]);
         const clienteId = clienteResult.rows[0].id;
-        
         const aluguelSql = 'INSERT INTO alugueis (casa_id, cliente_id, data_inicio, data_fim, valor_total) VALUES ($1, $2, $3, $4, $5)';
         await client.query(aluguelSql, [casa_id, clienteId, data_inicio, data_fim, valorTotal]);
-        
         await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['alugada', casa_id]);
-
         await client.query('COMMIT');
         res.redirect('/alugueis?success=1');
     } catch (error) {

@@ -11,14 +11,32 @@
 
     <main class="container">
         <div class="dashboard-form-container">
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h2><%= casasAlugadas %> / <%= totalCasas %></h2>
+                    <p>Casas Alugadas</p>
+                </div>
+                <div class="stat-card">
+                    <h2><%= totalCasas - casasAlugadas %></h2>
+                    <p>Casas Disponíveis</p>
+                </div>
+            </div>
+
+            <hr>
+
             <h3>Adicionar Nova Casa</h3>
 
-            <div id="mensagem-sucesso" class="mensagem-sucesso" style="display: none;">
-                Casa adicionada com sucesso!
-            </div>
-            <div id="mensagem-erro" class="mensagem-erro" style="display: none;">
-                Ocorreu um erro ao adicionar a casa. Tente novamente.
-            </div>
+            <% if (success) { %>
+                <div class="mensagem-sucesso">
+                    Casa adicionada com sucesso!
+                </div>
+            <% } %>
+            <% if (error) { %>
+                <div class="mensagem-erro">
+                    Ocorreu um erro ao adicionar a casa. Tente novamente.
+                </div>
+            <% } %>
 
             <form action="/casas" method="POST" enctype="multipart/form-data">
                 <div class="input-group">

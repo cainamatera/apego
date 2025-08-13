@@ -255,3 +255,31 @@ input[type="date"] {
     font-family: Arial, sans-serif;
 }
 
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    width: 45%;
+    border: 1px solid #dee2e6;
+}
+
+.stat-card h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: #007bff;
+}
+
+.stat-card p {
+    margin: 0;
+    color: #6c757d;
+    font-weight: bold;
+}
+
