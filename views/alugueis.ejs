@@ -15,6 +15,16 @@
                     <%= success %>
                 </div>
             <% } %>
+            <% if (locals.removido) { %>
+                <div class="mensagem-sucesso">
+                    Aluguel removido com sucesso! A casa está disponível novamente.
+                </div>
+            <% } %>
+            <% if (locals.casa_excluida) { %>
+                <div class="mensagem-sucesso">
+                    Casa excluída com sucesso do catálogo.
+                </div>
+            <% } %>
             <% if (locals.error) { %>
                 <div class="mensagem-erro">
                     Ocorreu um erro. Tente novamente.
@@ -54,7 +64,7 @@
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </form>
-                                    <a href="#" class="botao-acao botao-editar disabled" title="Editar Aluguel (Em breve)">
+                                    <a href="/aluguel/editar/<%= casa.aluguel_id %>" class="botao-acao botao-editar" title="Editar Aluguel">
                                         <i class="fas fa-pencil-alt"></i>
                                     </a>
                                 <% } else { %>

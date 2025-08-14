@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <%- include('partials/header', { titulo: 'Editar Aluguel - Apêgo' }) %>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    
+    <main class="container">
+        <div class="dashboard-form-container">
+            <div class="detalhes-casa">
+                <h3>Editando Aluguel da Casa: <%= aluguel.casa_titulo %></h3>
+            </div>
+
+            <hr>
+
+            <form action="/aluguel/editar/<%= aluguel.aluguel_id %>" method="POST">
+                <input type="hidden" name="cliente_id" value="<%= aluguel.cliente_id %>">
+                <input type="hidden" name="casa_id" value="<%= aluguel.casa_id %>">
+            
+                <h4>Dados do Cliente</h4>
+                <div class="input-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" value="<%= aluguel.cliente_nome %>" required>
+                </div>
+                <div class="input-group">
+                    <label for="rg">RG</label>
+                    <input type="text" id="rg" name="rg" value="<%= aluguel.cliente_rg %>">
+                </div>
+                <div class="input-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" name="telefone" value="<%= aluguel.cliente_telefone %>">
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<%= aluguel.cliente_email %>">
+                </div>
+
+                <h4>Período do Aluguel</h4>
+                <div class="input-group">
+                    <label for="data_inicio">Data de Início</label>
+                    <input type="date" id="data_inicio" name="data_inicio" value="<%= new Date(aluguel.data_inicio).toISOString().split('T')[0] %>" required>
+                </div>
+                <div class="input-group">
+                    <label for="data_fim">Data de Fim</label>
+                    <input type="date" id="data_fim" name="data_fim" value="<%= new Date(aluguel.data_fim).toISOString().split('T')[0] %>" required>
+                </div>
+                
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

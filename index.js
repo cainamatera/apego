@@ -123,29 +123,19 @@ app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
         const sql = `
             SELECT 
-                c.id, c.titulo, c.endereco, c.status, c.valor_mensal,
-                a.id AS aluguel_id, a.cliente_id, a.valor_total, a.data_inicio, a.data_fim
+                c.id, c.titulo, c.status, c.valor_mensal,
+                a.id AS aluguel_id, a.cliente_id
             FROM casas c
             LEFT JOIN alugueis a ON c.id = a.casa_id AND c.status = 'alugada'
             ORDER BY c.id DESC
         `;
         const result = await pool.query(sql);
-        const casasComDuracao = result.rows.map(casa => {
-            if (casa.status === 'alugada' && casa.data_inicio && casa.data_fim) {
-                const dataInicio = new Date(casa.data_inicio);
-                const dataFim = new Date(casa.data_fim);
-                const diffAnos = dataFim.getFullYear() - dataInicio.getFullYear();
-                const diffMeses = diffAnos * 12 + (dataFim.getMonth() - dataInicio.getMonth());
-                return { ...casa, duracaoEmMeses: Math.max(1, diffMeses) };
-            }
-            return casa;
-        });
         res.render('alugueis', { 
-            casas: casasComDuracao,
+            casas: result.rows,
             success: req.query.success,
-            error: req.query.error,
             removido: req.query.removido,
-            casa_excluida: req.query.casa_excluida
+            casa_excluida: req.query.casa_excluida,
+            error: req.query.error
         });
     } catch (error) {
         console.error('Erro ao buscar casas:', error);
@@ -207,7 +197,7 @@ app.post('/aluguel/:id', checarSeAdminLogado, async (req, res) => {
         await client.query(aluguelSql, [casa_id, clienteId, data_inicio, data_fim, valorTotal]);
         await client.query('UPDATE casas SET status = $1 WHERE id = $2', ['alugada', casa_id]);
         await client.query('COMMIT');
-        res.redirect('/alugueis?success=1');
+        res.redirect('/alugueis?success=Aluguel+registrado+com+sucesso');
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Erro ao registrar aluguel:', error);
@@ -269,6 +259,71 @@ app.post('/casa/editar/:id', checarSeAdminLogado, async (req, res) => {
     } catch (error) {
         console.error('Erro ao atualizar casa:', error);
         res.status(500).send('Erro ao salvar as alterações.');
+    }
+});
+
+app.get('/aluguel/editar/:id', checarSeAdminLogado, async (req, res) => {
+    try {
+        const { id: aluguel_id } = req.params;
+        const sql = `
+            SELECT
+                a.id AS aluguel_id,
+                a.data_inicio,
+                a.data_fim,
+                a.cliente_id,
+                c.id AS casa_id,
+                c.titulo AS casa_titulo,
+                cl.nome AS cliente_nome,
+                cl.rg AS cliente_rg,
+                cl.telefone AS cliente_telefone,
+                cl.email AS cliente_email
+            FROM alugueis a
+            JOIN casas c ON a.casa_id = c.id
+            JOIN clientes cl ON a.cliente_id = cl.id
+            WHERE a.id = $1
+        `;
+        const result = await pool.query(sql, [aluguel_id]);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Aluguel não encontrado.');
+        }
+        res.render('editar-aluguel', { aluguel: result.rows[0] });
+    } catch (error) {
+        console.error('Erro ao buscar dados do aluguel para edição:', error);
+        res.status(500).send('Erro ao carregar página de edição de aluguel.');
+    }
+});
+
+app.post('/aluguel/editar/:id', checarSeAdminLogado, async (req, res) => {
+    const { id: aluguel_id } = req.params;
+    const { nome, rg, telefone, email, data_inicio, data_fim, cliente_id, casa_id } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const clienteSql = 'UPDATE clientes SET nome = $1, rg = $2, telefone = $3, email = $4 WHERE id = $5';
+        await client.query(clienteSql, [nome, rg, telefone, email, cliente_id]);
+
+        const casaResult = await client.query('SELECT valor_mensal FROM casas WHERE id = $1', [casa_id]);
+        const valorMensal = casaResult.rows[0].valor_mensal;
+
+        const dataInicio = new Date(data_inicio);
+        const dataFim = new Date(data_fim);
+        const diffAnos = dataFim.getFullYear() - dataInicio.getFullYear();
+        const diffMeses = diffAnos * 12 + (dataFim.getMonth() - dataInicio.getMonth());
+        const duracaoMeses = Math.max(1, diffMeses);
+        const valorTotal = duracaoMeses * valorMensal;
+
+        const aluguelSql = 'UPDATE alugueis SET data_inicio = $1, data_fim = $2, valor_total = $3 WHERE id = $4';
+        await client.query(aluguelSql, [data_inicio, data_fim, valorTotal, aluguel_id]);
+
+        await client.query('COMMIT');
+        res.redirect('/alugueis?success=Aluguel+atualizado+com+sucesso');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Erro ao atualizar aluguel:', error);
+        res.status(500).send("Ocorreu um erro ao atualizar o aluguel.");
+    } finally {
+        client.release();
     }
 });
 
