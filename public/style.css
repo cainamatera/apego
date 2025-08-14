@@ -1,11 +1,9 @@
-/* Estilo geral, usado pelo painel */
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     margin: 0;
 }
 
-/* Estilo específico para centralizar o conteúdo da página de login */
 .body-login {
     display: flex;
     justify-content: center;
@@ -68,7 +66,7 @@ body {
     text-align: center;
 }
 
-h2, h3 {
+h2, h3, h4 {
     text-align: center;
     margin-top: 0;
     margin-bottom: 1.5rem;
@@ -90,13 +88,16 @@ input[type="email"],
 input[type="password"],
 input[type="text"],
 input[type="number"],
-textarea {
+textarea,
+input[type="date"],
+select {
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 1rem;
+    font-family: Arial, sans-serif;
 }
 
 button {
@@ -115,24 +116,23 @@ button:hover {
     background-color: #0056b3;
 }
 
-.mensagem-erro {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+.mensagem-erro, .mensagem-sucesso {
     padding: 0.75rem;
     border-radius: 4px;
     margin-bottom: 1rem;
     text-align: center;
 }
 
+.mensagem-erro {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
 .mensagem-sucesso {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-    text-align: center;
 }
 
 .botao-sair {
@@ -147,10 +147,7 @@ button:hover {
     color: white !important;
 }
 
-.input-file {
-    display: none;
-}
-
+.input-file { display: none; }
 .input-file-label {
     background-color: #007bff;
     color: white;
@@ -159,11 +156,7 @@ button:hover {
     cursor: pointer;
     display: inline-block;
 }
-
-.input-file-label:hover {
-    background-color: #0056b3;
-}
-
+.input-file-label:hover { background-color: #0056b3; }
 .file-name-display {
     margin-left: 1rem;
     font-style: italic;
@@ -175,8 +168,7 @@ button:hover {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 900px;
+    width: 100%;
 }
 
 table {
@@ -184,116 +176,37 @@ table {
     border-collapse: collapse;
     margin-top: 1.5rem;
 }
-
 th, td {
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    vertical-align: middle;
 }
-
-th {
-    background-color: #f8f9fa;
-}
-
+th { background-color: #f8f9fa; }
 .status-chip {
     padding: 0.25rem 0.6rem;
     border-radius: 12px;
     font-size: 0.8rem;
     font-weight: bold;
 }
-
-.status-disponivel {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-alugada {
-    background-color: #e2e3e5;
-    color: #383d41;
-}
-
-.acao-icon {
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.check-verde {
-    color: #28a745;
-}
-
-.mais-vermelho {
-    color: #dc3545;
-}
-
+.status-disponivel { background-color: #d4edda; color: #155724; }
+.status-alugada { background-color: #e2e3e5; color: #383d41; }
+.acao-icon { font-size: 1.2rem; font-weight: bold; text-decoration: none; }
+.check-verde { color: #28a745; }
+.mais-vermelho { color: #dc3545; }
 .detalhes-casa {
     text-align: center;
     margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #eee;
 }
-
-.detalhes-casa p {
-    color: #6c757d;
-    margin-top: -1rem;
-}
-
-form h4 {
-    text-align: center;
-    color: #333;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-input[type="date"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 1rem;
-    font-family: Arial, sans-serif;
-}
-
-.stats-container {
-    display: flex;
-    justify-content: space-around;
-    gap: 1rem;
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    width: 45%;
-    border: 1px solid #dee2e6;
-}
-
-.stat-card h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 2rem;
-    color: #007bff;
-}
-
-.stat-card p {
-    margin: 0;
-    color: #6c757d;
-    font-weight: bold;
-}
-
-.acoes-cell {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.acao-form {
-    margin: 0;
-    padding: 0;
-}
-
+.detalhes-casa p { color: #6c757d; margin-top: -1rem; }
+.stats-container { display: flex; justify-content: space-around; gap: 1rem; text-align: center; margin-bottom: 2rem; }
+.stat-card { background-color: #f8f9fa; padding: 1rem; border-radius: 8px; width: 45%; border: 1px solid #dee2e6; }
+.stat-card h2 { margin: 0 0 0.5rem 0; font-size: 2rem; color: #007bff; }
+.stat-card p { margin: 0; color: #6c757d; font-weight: bold; }
+.acoes-cell { display: flex; gap: 0.5rem; align-items: center; }
+.acao-form { margin: 0; padding: 0; }
 .botao-acao {
     display: inline-flex;
     justify-content: center;
@@ -307,26 +220,44 @@ input[type="date"] {
     cursor: pointer;
     text-decoration: none;
 }
-
+.botao-acao.disabled { background-color: #e2e3e5; cursor: not-allowed; color: #6c757d; }
+.botao-acao.disabled:hover { background-color: #e2e3e5; }
 .botao-alugar { background-color: #28a745; }
 .botao-alugar:hover { background-color: #218838; }
-
 .botao-editar { background-color: #ffc107; color: #212529; }
 .botao-editar:hover { background-color: #e0a800; }
-
 .botao-excluir { background-color: #dc3545; }
 .botao-excluir:hover { background-color: #c82333; }
-
 .botao-cancelar { background-color: #6c757d; }
 .botao-cancelar:hover { background-color: #5a6268; }
 
-.botao-acao.disabled {
-    background-color: #e2e3e5;
-    cursor: not-allowed;
-    color: #6c757d;
+.container-com-sidebar {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.botao-acao.disabled:hover {
-    background-color: #e2e3e5;
+.sidebar-filtros {
+    flex: 1;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.conteudo-principal {
+    flex: 3;
+}
+
+.botao-filtrar {
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+.botao-filtrar:hover {
+    background-color: #0056b3;
+}

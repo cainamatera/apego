@@ -6,8 +6,34 @@
 <body>
     <%- include('partials/navbar') %>
 
-    <main class="container">
-        <div class="table-container">
+    <main class="container-com-sidebar">
+        <aside class="sidebar-filtros card-painel">
+            <h4>Filtros</h4>
+            <form action="/alugueis" method="GET">
+                <div class="input-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">Todos</option>
+                        <option value="disponivel" <%= locals.filtros && filtros.status === 'disponivel' ? 'selected' : '' %>>Disponível</option>
+                        <option value="alugada" <%= locals.filtros && filtros.status === 'alugada' ? 'selected' : '' %>>Alugada</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="valor_min">Valor Mínimo</label>
+                    <input type="number" name="valor_min" id="valor_min" step="0.01" value="<%= locals.filtros && filtros.valor_min ? filtros.valor_min : '' %>">
+                </div>
+
+                <div class="input-group">
+                    <label for="valor_max">Valor Máximo</label>
+                    <input type="number" name="valor_max" id="valor_max" step="0.01" value="<%= locals.filtros && filtros.valor_max ? filtros.valor_max : '' %>">
+                </div>
+
+                <button type="submit" class="botao-filtrar">Filtrar</button>
+            </form>
+        </aside>
+
+        <section class="conteudo-principal card-painel">
             <h3>Gestão de Casas e Alugueis</h3>
 
             <% if (locals.success) { %>
@@ -85,7 +111,7 @@
                     <% }) %>
                 </tbody>
             </table>
-        </div>
+        </section>
     </main>
 </body>
 </html>

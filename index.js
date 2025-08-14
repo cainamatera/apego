@@ -121,17 +121,43 @@ app.post('/casas', checarSeAdminLogado, upload.array('imagens', 10), async (req,
 
 app.get('/alugueis', checarSeAdminLogado, async (req, res) => {
     try {
-        const sql = `
+        let baseSql = `
             SELECT 
                 c.id, c.titulo, c.status, c.valor_mensal,
                 a.id AS aluguel_id, a.cliente_id
             FROM casas c
             LEFT JOIN alugueis a ON c.id = a.casa_id AND c.status = 'alugada'
-            ORDER BY c.id DESC
         `;
-        const result = await pool.query(sql);
+
+        const whereClauses = [];
+        const queryParams = [];
+
+        if (req.query.status) {
+            queryParams.push(req.query.status);
+            whereClauses.push(`c.status = $${queryParams.length}`);
+        }
+
+        if (req.query.valor_min) {
+            queryParams.push(req.query.valor_min);
+            whereClauses.push(`c.valor_mensal >= $${queryParams.length}`);
+        }
+
+        if (req.query.valor_max) {
+            queryParams.push(req.query.valor_max);
+            whereClauses.push(`c.valor_mensal <= $${queryParams.length}`);
+        }
+
+        if (whereClauses.length > 0) {
+            baseSql += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        baseSql += ' ORDER BY c.id DESC';
+
+        const result = await pool.query(baseSql, queryParams);
+
         res.render('alugueis', { 
             casas: result.rows,
+            filtros: req.query,
             success: req.query.success,
             removido: req.query.removido,
             casa_excluida: req.query.casa_excluida,
@@ -299,23 +325,18 @@ app.post('/aluguel/editar/:id', checarSeAdminLogado, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-
         const clienteSql = 'UPDATE clientes SET nome = $1, rg = $2, telefone = $3, email = $4 WHERE id = $5';
         await client.query(clienteSql, [nome, rg, telefone, email, cliente_id]);
-
         const casaResult = await client.query('SELECT valor_mensal FROM casas WHERE id = $1', [casa_id]);
         const valorMensal = casaResult.rows[0].valor_mensal;
-
         const dataInicio = new Date(data_inicio);
         const dataFim = new Date(data_fim);
         const diffAnos = dataFim.getFullYear() - dataInicio.getFullYear();
         const diffMeses = diffAnos * 12 + (dataFim.getMonth() - dataInicio.getMonth());
         const duracaoMeses = Math.max(1, diffMeses);
         const valorTotal = duracaoMeses * valorMensal;
-
         const aluguelSql = 'UPDATE alugueis SET data_inicio = $1, data_fim = $2, valor_total = $3 WHERE id = $4';
         await client.query(aluguelSql, [data_inicio, data_fim, valorTotal, aluguel_id]);
-
         await client.query('COMMIT');
         res.redirect('/alugueis?success=Aluguel+atualizado+com+sucesso');
     } catch (error) {
